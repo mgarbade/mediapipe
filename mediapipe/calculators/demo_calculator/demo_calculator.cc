@@ -2,6 +2,15 @@
 #include "mediapipe/framework/port/logging.h"
 #include "mediapipe/framework/port/status.h"
 
+
+// #include <memory>
+#include <string>
+// #include <vector>
+
+// #include "absl/strings/str_split.h"
+// #include "absl/strings/string_view.h"
+// #include "absl/strings/strip.h"
+
 #include "mediapipe/calculators/demo_calculator/demo_calculator.pb.h"
 
 
@@ -18,8 +27,8 @@ class ExampleCalculator : public CalculatorBase {
 };
 
 absl::Status ExampleCalculator::GetContract(CalculatorContract* cc) {
-  cc->Inputs().Tag("TAG_NAME").Set<std::string>();
-  cc->Outputs().Tag("OUTPUT_TAG_NAME").Set<std::string>();
+  cc->Inputs().Tag("INPUT").Set<std::string>();
+  cc->Outputs().Tag("OUTPUT").Set<std::string>();
   return absl::OkStatus();
 }
 
@@ -30,6 +39,17 @@ absl::Status ExampleCalculator::Open(CalculatorContext* cc) {
 }
 
 absl::Status ExampleCalculator::Process(CalculatorContext* cc) {
+  if (!cc->Inputs().Tag("INPUT").IsEmpty())
+  {
+    auto stringInput = cc->Inputs().Tag("INPUT").Get<std::string>();
+    auto stringOutput = stringInput + " - my additional text element";
+
+    Packet data = MakePacket<std::string>(stringOutput);
+    Packet dataWithTimestamp = data.At(Timestamp::PostStream());
+    cc->Outputs().Tag("OUTPUT").AddPacket(dataWithTimestamp);
+    //cc->Outputs().Tag("OUTPUT").AddPacket(cc->Inputs().Tag("INPUT").Value());
+    
+  }
   return absl::OkStatus();
 }
 

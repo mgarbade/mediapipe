@@ -28,14 +28,9 @@ absl::Status PrintHelloWorld() {
         input_stream: "in"
         output_stream: "out"
         node {
-          calculator: "PassThroughCalculator"
-          input_stream: "in"
-          output_stream: "out1"
-        }
-        node {
-          calculator: "PassThroughCalculator"
-          input_stream: "out1"
-          output_stream: "out"
+          calculator: "ExampleCalculator"
+          input_stream: "INPUT:in"
+          output_stream: "OUTPUT:out"
         }
       )pb");
 
