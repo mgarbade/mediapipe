@@ -45,10 +45,10 @@ absl::Status ExampleCalculator::Process(CalculatorContext* cc) {
     auto stringOutput = stringInput + " - my additional text element";
 
     Packet data = MakePacket<std::string>(stringOutput);
-    Packet dataWithTimestamp = data.At(Timestamp::PostStream());
+    Timestamp outputTimestamp = cc->InputTimestamp();
+    Packet dataWithTimestamp = data.At(outputTimestamp);
     cc->Outputs().Tag("OUTPUT").AddPacket(dataWithTimestamp);
     //cc->Outputs().Tag("OUTPUT").AddPacket(cc->Inputs().Tag("INPUT").Value());
-    
   }
   return absl::OkStatus();
 }
