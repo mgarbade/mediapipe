@@ -2,6 +2,8 @@
 #include "mediapipe/framework/port/logging.h"
 #include "mediapipe/framework/port/status.h"
 
+#include "mediapipe/calculators/demo_calculator/demo_calculator.pb.h"
+
 
 namespace mediapipe {
 
@@ -22,6 +24,8 @@ absl::Status ExampleCalculator::GetContract(CalculatorContract* cc) {
 }
 
 absl::Status ExampleCalculator::Open(CalculatorContext* cc) {
+  const auto& options = cc->Options<::mediapipe::ExampleCalculatorOptions>();
+  auto var = options.option_parameter_1();
   return absl::OkStatus();
 }
 
