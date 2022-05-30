@@ -1,19 +1,25 @@
-load("//mediapipe/framework/port:build_config.bzl", "mediapipe_proto_library")
-
 licenses(["notice"])
 
 package(default_visibility = ["//visibility:private"])
 
-mediapipe_proto_library(
-    name = "example_calculator_proto",
-    srcs = ["example_proto.proto"],
+load("//mediapipe/framework/port:build_config.bzl", "mediapipe_cc_proto_library")
+
+proto_library(
+    name = "demo_calculator_proto",
+    srcs = ["demo_calculator.proto"],
     visibility = ["//visibility:public"],
     deps = [
-        "//mediapipe/framework:calculator_options_proto",
         "//mediapipe/framework:calculator_proto",
     ],
 )
 
+mediapipe_cc_proto_library(
+    name = "demo_calculator_cc_proto",
+    srcs = ["demo_calculator.proto"],
+    cc_deps = ["//mediapipe/framework:calculator_cc_proto"],
+    visibility = ["//visibility:public"],
+    deps = [":demo_calculator_proto"],
+)
 
 
 cc_library(
@@ -25,6 +31,7 @@ cc_library(
     deps = [
         "//mediapipe/framework:calculator_framework",
         "//mediapipe/framework/port:status",
+        ":demo_calculator_cc_proto"
     ],
     alwayslink = 1,
 )
