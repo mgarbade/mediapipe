@@ -7,7 +7,7 @@ cc_binary(
     srcs = ["action.cc"],
     visibility = ["//visibility:public"],
     deps = [
-        "//mediapipe/calculators/demo_calculator:demo_calculator",
+        "//mediapipe/calculators/action:action_calculator",
         "//mediapipe/calculators/core:pass_through_calculator",
         "//mediapipe/framework:calculator_graph",
         "//mediapipe/framework/port:logging",

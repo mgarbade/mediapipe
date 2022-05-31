@@ -70,6 +70,8 @@ absl::Status PrintNetworkOutput() {
   // Get the output packets string.
   while (poller.Next(&packet)) {
     auto outputVectorFloat = packet.Get<std::vector<float>>();
+    // LOG(INFO) << outputVectorFloat;
+
     std::string outputString1 = std::to_string(outputVectorFloat[0]);
     std::string outputString2 = std::to_string(outputVectorFloat[1]);
     LOG(INFO) << outputString1;
