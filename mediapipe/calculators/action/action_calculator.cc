@@ -5,13 +5,13 @@
 
 // #include <memory>
 #include <string>
-// #include <vector>
+#include <vector>
 
 // #include "absl/strings/str_split.h"
 // #include "absl/strings/string_view.h"
 // #include "absl/strings/strip.h"
 
-#include "mediapipe/calculators/action/action.pb.h"
+// #include "mediapipe/calculators/action/action.pb.h"
 
 
 namespace mediapipe {
@@ -33,8 +33,8 @@ absl::Status ActionCalculator::GetContract(CalculatorContract* cc) {
 }
 
 absl::Status ActionCalculator::Open(CalculatorContext* cc) {
-  const auto& options = cc->Options<::mediapipe::ActionCalculatorOptions>();
-  auto var = options.option_parameter_1();
+  // const auto& options = cc->Options<::mediapipe::ActionCalculatorOptions>();
+  // auto var = options.option_parameter_1();
   return absl::OkStatus();
 }
 
