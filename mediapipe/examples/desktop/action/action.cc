@@ -26,7 +26,7 @@ namespace mediapipe {
 
 absl::Status PrintNetworkOutput() {
 
-  std::cout << "PrintNetworkOutput" << std::endl;
+  LOG(INFO) << "PrintNetworkOutput";
   // Configures a simple graph, which concatenates 2 PassThroughCalculators.
   CalculatorGraphConfig config =
       ParseTextProtoOrDie<CalculatorGraphConfig>(R"pb(
@@ -40,7 +40,7 @@ absl::Status PrintNetworkOutput() {
       )pb");
 
   CalculatorGraph graph;
-  std::cout << "MP_RETURN_IF_ERROR(graph.Initialize(config));" << std::endl;
+  LOG(INFO) << "MP_RETURN_IF_ERROR(graph.Initialize(config));";
   MP_RETURN_IF_ERROR(graph.Initialize(config));
   ASSIGN_OR_RETURN(OutputStreamPoller poller,
                    graph.AddOutputStreamPoller("out"));
@@ -48,16 +48,16 @@ absl::Status PrintNetworkOutput() {
 
 
   // Give 10 input packets that contain the vector [1.0, 1.0].
-  std::cout << "std::vector<float> inputVector;" << std::endl;
+  LOG(INFO) <<"std::vector<float> inputVector;";
   std::vector<float> inputVector;
   inputVector.push_back(1.0);
   inputVector.push_back(2.0);
 
-  std::string outputString1 = std::to_string(inputVector[0]);
-  std::string outputString2 = std::to_string(inputVector[1]);
+  std::string inputString1 = std::to_string(inputVector[0]);
+  std::string inputString2 = std::to_string(inputVector[1]);
   
-  std::cout << "outputString1: " << outputString1 << std::endl;
-  std::cout << "outputString2: " << outputString2 << std::endl;
+  LOG(INFO) <<"inputString1: " << inputString1;
+  LOG(INFO) <<"inputString2: " << inputString2;
 
   for (int i = 0; i < 10; ++i) {
     MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
@@ -82,9 +82,9 @@ absl::Status PrintNetworkOutput() {
 }  // namespace mediapipe
 
 int main(int argc, char** argv) {
-  std::cout << "Start main function" << std::endl;
+  LOG(INFO) << "Start main function";
   google::InitGoogleLogging(argv[0]);
-  std::cout << "Start Mediapipe" << std::endl;
+  LOG(INFO) << "Start Mediapipe";
   CHECK(mediapipe::PrintNetworkOutput().ok());
   return 0;
 }
