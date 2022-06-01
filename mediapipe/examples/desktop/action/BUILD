@@ -8,6 +8,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "//mediapipe/calculators/action:action_calculator",
+        "//mediapipe/calculators/action:vector_to_tensor_calculator",
         "//mediapipe/calculators/core:pass_through_calculator",
         "//mediapipe/framework:calculator_graph",
         "//mediapipe/framework/port:logging",

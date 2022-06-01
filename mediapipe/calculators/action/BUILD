@@ -36,5 +36,19 @@ cc_library(
     alwayslink = 1,
 )
 
+cc_library(
+    name = "vector_to_tensor_calculator",
+    srcs = ["vector_to_tensor_calculator.cc"],
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        "//mediapipe/framework:calculator_framework",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/framework/formats:matrix",
+    ],
+    alwayslink = 1,
+)
+
 
 

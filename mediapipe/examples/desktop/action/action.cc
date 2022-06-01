@@ -18,6 +18,7 @@
 #include "mediapipe/framework/port/logging.h"
 #include "mediapipe/framework/port/parse_text_proto.h"
 #include "mediapipe/framework/port/status.h"
+#include "mediapipe/framework/formats/matrix.h"
 
 #include <iostream>
 #include <vector>
@@ -30,13 +31,15 @@ absl::Status PrintNetworkOutput() {
   // Configures a simple graph, which concatenates 2 PassThroughCalculators.
   CalculatorGraphConfig config =
       ParseTextProtoOrDie<CalculatorGraphConfig>(R"pb(
-        input_stream: "in"
-        output_stream: "out"
+        input_stream: "INPUT:in"
+        output_stream: "OUTPUT:out"
+
         node {
-          calculator: "ActionCalculator"
+          calculator: "VectorToTensorCalculator"
           input_stream: "INPUT:in"
           output_stream: "OUTPUT:out"
         }
+
       )pb");
 
   CalculatorGraph graph;
@@ -67,10 +70,14 @@ absl::Status PrintNetworkOutput() {
   MP_RETURN_IF_ERROR(graph.CloseInputStream("in"));
   mediapipe::Packet packet;
 
-  // Get the output packets string.
+  // Get output packets.
+  LOG(INFO) << "Get output packets";
   while (poller.Next(&packet)) {
-    auto outputVectorFloat = packet.Get<std::vector<float>>();
-    // LOG(INFO) << outputVectorFloat;
+    auto outputMatrix = packet.Get<Matrix>();
+    
+    std::vector<float> outputVectorFloat;
+    outputVectorFloat.push_back(outputMatrix(0, 0));
+    outputVectorFloat.push_back(outputMatrix(1, 0));
 
     std::string outputString1 = std::to_string(outputVectorFloat[0]);
     std::string outputString2 = std::to_string(outputVectorFloat[1]);
