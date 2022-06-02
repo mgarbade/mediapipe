@@ -183,6 +183,7 @@ bool ShouldUseGpu(CC* cc) {
 }  // namespace
 
 absl::Status TfLiteConverterCalculator::GetContract(CalculatorContract* cc) {
+  LOG(INFO) << "TfLiteConverterCalculator::GetContract";
   // Confirm only one of the input streams is present.
   RET_CHECK(cc->Inputs().HasTag(kImageFrameTag) ^
             cc->Inputs().HasTag(kGpuBufferTag) ^
@@ -226,6 +227,7 @@ absl::Status TfLiteConverterCalculator::GetContract(CalculatorContract* cc) {
 }
 
 absl::Status TfLiteConverterCalculator::Open(CalculatorContext* cc) {
+  LOG(INFO) << "TfLiteConverterCalculator::Open";
   cc->SetOffset(TimestampDiff(0));
 
   MP_RETURN_IF_ERROR(LoadOptions(cc));
@@ -250,10 +252,12 @@ absl::Status TfLiteConverterCalculator::Open(CalculatorContext* cc) {
     interpreter_->SetInputs({0});
   }
 
+  LOG(INFO) << "TfLiteConverterCalculator::Open Completed";
   return absl::OkStatus();
 }
 
 absl::Status TfLiteConverterCalculator::Process(CalculatorContext* cc) {
+  LOG(INFO) << "TfLiteConverterCalculator::Process";
   if (use_gpu_) {
     if (cc->Inputs().Tag(kGpuBufferTag).IsEmpty()) {
       return absl::OkStatus();
@@ -395,7 +399,9 @@ absl::Status TfLiteConverterCalculator::ProcessCPU(CalculatorContext* cc) {
     float* tensor_ptr = tensor->data.f;
     RET_CHECK(tensor_ptr);
 
+    LOG(INFO) << "MP_RETURN_IF_ERROR(CopyMatrixToTensor(matrix, tensor_ptr));";
     MP_RETURN_IF_ERROR(CopyMatrixToTensor(matrix, tensor_ptr));
+    LOG(INFO) << "MP_RETURN_IF_ERROR(CopyMatrixToTensor(matrix, tensor_ptr)); Completed";
 
     auto output_tensors = absl::make_unique<std::vector<TfLiteTensor>>();
     output_tensors->emplace_back(*tensor);

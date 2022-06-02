@@ -332,6 +332,7 @@ bool ShouldUseGpu(CC* cc) {
 }  // namespace
 
 absl::Status TfLiteInferenceCalculator::GetContract(CalculatorContract* cc) {
+  LOG(INFO) << "TfLiteInferenceCalculator::GetContract";
   RET_CHECK(cc->Inputs().HasTag(kTensorsTag) ^
             cc->Inputs().HasTag(kTensorsGpuTag));
   RET_CHECK(cc->Outputs().HasTag(kTensorsTag) ^
@@ -377,6 +378,7 @@ absl::Status TfLiteInferenceCalculator::GetContract(CalculatorContract* cc) {
 }
 
 absl::Status TfLiteInferenceCalculator::Open(CalculatorContext* cc) {
+  LOG(INFO) << "TfLiteInferenceCalculator::Open";
   cc->SetOffset(TimestampDiff(0));
 
   const auto& options =
@@ -433,6 +435,7 @@ absl::Status TfLiteInferenceCalculator::Open(CalculatorContext* cc) {
 }
 
 absl::Status TfLiteInferenceCalculator::Process(CalculatorContext* cc) {
+  LOG(INFO) << "TfLiteInferenceCalculator::Process";
   return RunInContextIfNeeded([this, cc]() -> absl::Status {
     // 0. Declare outputs
     auto output_tensors_gpu = absl::make_unique<std::vector<GpuTensor>>();

@@ -9,6 +9,8 @@ cc_binary(
     deps = [
         "//mediapipe/calculators/action:action_calculator",
         "//mediapipe/calculators/action:vector_to_tensor_calculator",
+        "//mediapipe/calculators/tflite:tflite_converter_calculator",
+        "//mediapipe/calculators/tflite:tflite_inference_calculator",
         "//mediapipe/calculators/core:pass_through_calculator",
         "//mediapipe/framework:calculator_graph",
         "//mediapipe/framework/port:logging",

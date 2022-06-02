@@ -32,12 +32,35 @@ absl::Status PrintNetworkOutput() {
   CalculatorGraphConfig config =
       ParseTextProtoOrDie<CalculatorGraphConfig>(R"pb(
         input_stream: "INPUT:in"
-        output_stream: "OUTPUT:out"
+        output_stream: "MATRIX:matrix"
+
+        node {
+          calculator: "ActionCalculator"
+          input_stream: "INPUT:in"
+          output_stream: "VECTOR_FLOAT:vector_float"
+        }
 
         node {
           calculator: "VectorToTensorCalculator"
-          input_stream: "INPUT:in"
-          output_stream: "OUTPUT:out"
+          input_stream: "VECTOR_FLOAT:vector_float"
+          output_stream: "MATRIX:matrix"
+        }
+
+        node {
+          calculator: "TfLiteConverterCalculator"
+          input_stream: "MATRIX:matrix"
+          output_stream: "TENSORS:landmark_tensors"
+        }
+
+        node {
+          calculator: "TfLiteInferenceCalculator"
+          input_stream: "TENSORS:landmark_tensors"
+          output_stream: "TENSORS:signn_predictions"
+          node_options: {
+            [type.googleapis.com/mediapipe.TfLiteInferenceCalculatorOptions] {
+              model_path: "mediapipe/models/adder_model_single_input.tflite"
+            }
+          }
         }
 
       )pb");
@@ -46,7 +69,7 @@ absl::Status PrintNetworkOutput() {
   LOG(INFO) << "MP_RETURN_IF_ERROR(graph.Initialize(config));";
   MP_RETURN_IF_ERROR(graph.Initialize(config));
   ASSIGN_OR_RETURN(OutputStreamPoller poller,
-                   graph.AddOutputStreamPoller("out"));
+                   graph.AddOutputStreamPoller("matrix"));
   MP_RETURN_IF_ERROR(graph.StartRun({}));
 
 
@@ -74,10 +97,14 @@ absl::Status PrintNetworkOutput() {
   LOG(INFO) << "Get output packets";
   while (poller.Next(&packet)) {
     auto outputMatrix = packet.Get<Matrix>();
-    
+    LOG(INFO) << "outputMatrix: " << outputMatrix 
+              << " outputMatrix.size:" << outputMatrix.size()
+              << " outputMatrix.rows:" << outputMatrix.rows()
+              << " outputMatrix.cols:" << outputMatrix.cols();
     std::vector<float> outputVectorFloat;
+
     outputVectorFloat.push_back(outputMatrix(0, 0));
-    outputVectorFloat.push_back(outputMatrix(1, 0));
+    outputVectorFloat.push_back(outputMatrix(0, 1));
 
     std::string outputString1 = std::to_string(outputVectorFloat[0]);
     std::string outputString2 = std::to_string(outputVectorFloat[1]);

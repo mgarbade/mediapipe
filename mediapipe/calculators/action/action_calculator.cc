@@ -18,6 +18,12 @@
 
 namespace mediapipe {
 
+// Tag names of input and output nodes
+namespace{
+  constexpr char InputVectorFloat[] = "INPUT";
+  constexpr char OutputVectorFloat[] = "VECTOR_FLOAT";
+}
+
 class ActionCalculator : public CalculatorBase {
  public:
   static absl::Status GetContract(CalculatorContract* cc);
@@ -29,8 +35,9 @@ class ActionCalculator : public CalculatorBase {
 };
 
 absl::Status ActionCalculator::GetContract(CalculatorContract* cc) {
-  cc->Inputs().Tag("INPUT").Set<std::vector<float>>();
-  cc->Outputs().Tag("OUTPUT").Set<std::vector<float>>();
+  LOG(INFO) << "ActionCalculator::GetContract(CalculatorContract* cc)";
+  cc->Inputs().Tag(InputVectorFloat).Set<std::vector<float>>();
+  cc->Outputs().Tag(OutputVectorFloat).Set<std::vector<float>>();
   return absl::OkStatus();
 }
 
@@ -41,9 +48,10 @@ absl::Status ActionCalculator::Open(CalculatorContext* cc) {
 }
 
 absl::Status ActionCalculator::Process(CalculatorContext* cc) {
-  if (!cc->Inputs().Tag("INPUT").IsEmpty())
+  LOG(INFO) << "ActionCalculator::Process";
+  if (!cc->Inputs().Tag(InputVectorFloat).IsEmpty())
   {
-    auto inputVectorFloat = cc->Inputs().Tag("INPUT").Get<std::vector<float>>();
+    auto inputVectorFloat = cc->Inputs().Tag(InputVectorFloat).Get<std::vector<float>>();
     
     // make NN forward pass / inference here
 
@@ -51,7 +59,7 @@ absl::Status ActionCalculator::Process(CalculatorContext* cc) {
     Packet data = MakePacket<std::vector<float>>(inputVectorFloat);
     Timestamp outputTimestamp = cc->InputTimestamp();
     Packet dataWithTimestamp = data.At(outputTimestamp);
-    cc->Outputs().Tag("OUTPUT").AddPacket(dataWithTimestamp);
+    cc->Outputs().Tag(OutputVectorFloat).AddPacket(dataWithTimestamp);
   }
   return absl::OkStatus();
 }
