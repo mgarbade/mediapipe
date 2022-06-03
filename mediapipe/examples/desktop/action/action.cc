@@ -58,7 +58,7 @@ absl::Status PrintNetworkOutput() {
           output_stream: "TENSORS:signn_predictions"
           node_options: {
             [type.googleapis.com/mediapipe.TfLiteInferenceCalculatorOptions] {
-              model_path: "mediapipe/models/adder_model_single_input.tflite"
+              model_path: "mediapipe/models/adder_model_single_input_2x3.tflite"
             }
           }
         }
@@ -76,15 +76,12 @@ absl::Status PrintNetworkOutput() {
   // Give 10 input packets that contain the vector [1.0, 1.0].
   LOG(INFO) <<"std::vector<float> inputVector;";
   std::vector<float> inputVector;
-  inputVector.push_back(1.0);
-  inputVector.push_back(2.0);
-
-  std::string inputString1 = std::to_string(inputVector[0]);
-  std::string inputString2 = std::to_string(inputVector[1]);
+  for (size_t i = 0; i < 6; i++)
+  {
+    inputVector.push_back((float) i + 1);
+    // LOG(INFO) <<"inputVector[i]: " << std::to_string(inputVector[i]);
+  }
   
-  LOG(INFO) <<"inputString1: " << inputString1;
-  LOG(INFO) <<"inputString2: " << inputString2;
-
   for (int i = 0; i < 10; ++i) {
     MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
         "in", MakePacket<std::vector<float>>(inputVector).At(Timestamp(i))));
@@ -103,13 +100,13 @@ absl::Status PrintNetworkOutput() {
               << " outputMatrix.cols:" << outputMatrix.cols();
     std::vector<float> outputVectorFloat;
 
-    outputVectorFloat.push_back(outputMatrix(0, 0));
-    outputVectorFloat.push_back(outputMatrix(0, 1));
+    // outputVectorFloat.push_back(outputMatrix(0, 0));
+    // outputVectorFloat.push_back(outputMatrix(0, 1));
 
-    std::string outputString1 = std::to_string(outputVectorFloat[0]);
-    std::string outputString2 = std::to_string(outputVectorFloat[1]);
-    LOG(INFO) << outputString1;
-    LOG(INFO) << outputString2;
+    // std::string outputString1 = std::to_string(outputVectorFloat[0]);
+    // std::string outputString2 = std::to_string(outputVectorFloat[1]);
+    // LOG(INFO) << outputString1;
+    // LOG(INFO) << outputString2;
   }
   return graph.WaitUntilDone();
 }
