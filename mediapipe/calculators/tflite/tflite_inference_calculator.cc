@@ -431,6 +431,7 @@ absl::Status TfLiteInferenceCalculator::Open(CalculatorContext* cc) {
   } else {
     MP_RETURN_IF_ERROR(LoadDelegate(cc));
   }
+  LOG(INFO) << "TfLiteInferenceCalculator::Open Completed";
   return absl::OkStatus();
 }
 
@@ -473,13 +474,14 @@ absl::Status TfLiteInferenceCalculator::Process(CalculatorContext* cc) {
 #endif  // MEDIAPIPE_TFLITE_GL_INFERENCE
 
     // 3. Output processed tensors.
+    LOG(INFO) << "TfLiteInferenceCalculator:: Output processed tensors";
     if (gpu_output_ || use_advanced_gpu_api_) {
       MP_RETURN_IF_ERROR(ProcessOutputsGpu(cc, std::move(output_tensors_cpu),
                                            std::move(output_tensors_gpu)));
     } else {
       MP_RETURN_IF_ERROR(ProcessOutputsCpu(cc, std::move(output_tensors_cpu)));
     }
-
+    LOG(INFO) << "TfLiteInferenceCalculator::Process Completed";
     return absl::OkStatus();
   });
 }
