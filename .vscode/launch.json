@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "preLaunchTask": "Bazel Build (Debug)",
+        "name": "CodeLLDB",
+        "type": "lldb",
+        "request": "launch",
+        "console": "internalConsole", 
+        "program": "${workspaceFolder}/bazel-out/k8-dbg/bin/mediapipe/examples/desktop/action/action",
+        "args": ["--define MEDIAPIPE_DISABLE_GPU=1"],
+        "env": {"GLOG_logtostderr":"1"},
+        "sourceMap": {
+          "/proc/self/cwd/": "${workspaceFolder}"
+        },
+      }
+    ]
+  }
