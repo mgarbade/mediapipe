@@ -58,7 +58,8 @@ absl::Status PrintNetworkOutput() {
           output_stream: "TENSORS:signn_predictions"
           node_options: {
             [type.googleapis.com/mediapipe.TfLiteInferenceCalculatorOptions] {
-              model_path: "mediapipe/models/adder_model_single_input_2x3.tflite"
+              model_path: "mediapipe/models/signn_dynamic.tflite"
+              delegate { xnnpack {} }
             }
           }
         }
@@ -94,11 +95,11 @@ absl::Status PrintNetworkOutput() {
   LOG(INFO) << "Get output packets";
   while (poller.Next(&packet)) {
     auto outputMatrix = packet.Get<Matrix>();
-    LOG(INFO) << "outputMatrix: " << outputMatrix 
-              << " outputMatrix.size:" << outputMatrix.size()
-              << " outputMatrix.rows:" << outputMatrix.rows()
-              << " outputMatrix.cols:" << outputMatrix.cols();
-    std::vector<float> outputVectorFloat;
+    // LOG(INFO) << "outputMatrix: " << outputMatrix 
+    //           << " outputMatrix.size:" << outputMatrix.size()
+    //           << " outputMatrix.rows:" << outputMatrix.rows()
+    //           << " outputMatrix.cols:" << outputMatrix.cols();
+    // std::vector<float> outputVectorFloat;
 
     // outputVectorFloat.push_back(outputMatrix(0, 0));
     // outputVectorFloat.push_back(outputMatrix(0, 1));
