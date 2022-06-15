@@ -32,7 +32,7 @@ absl::Status PrintNetworkOutput() {
   CalculatorGraphConfig config =
       ParseTextProtoOrDie<CalculatorGraphConfig>(R"pb(
         input_stream: "INPUT:in"
-        output_stream: "TENSORS:tflite_prediction"
+        output_stream: "MATRIX:matrix"
 
         node {
           calculator: "ActionCalculator"
@@ -46,31 +46,13 @@ absl::Status PrintNetworkOutput() {
           output_stream: "MATRIX:matrix"
         }
 
-        node {
-          calculator: "TfLiteConverterCalculator"
-          input_stream: "MATRIX:matrix"
-          output_stream: "TENSORS:landmark_tensors"
-        }
-
-        node {
-          calculator: "TfLiteInferenceCalculator"
-          input_stream: "TENSORS:landmark_tensors"
-          output_stream: "TENSORS:tflite_prediction"
-          node_options: {
-            [type.googleapis.com/mediapipe.TfLiteInferenceCalculatorOptions] {
-              model_path: "mediapipe/models/adder_model_single_input_2x3.tflite"
-              delegate { xnnpack {} }
-            }
-          }
-        }
-
       )pb");
 
   CalculatorGraph graph;
   LOG(INFO) << "MP_RETURN_IF_ERROR(graph.Initialize(config));";
   MP_RETURN_IF_ERROR(graph.Initialize(config));
   ASSIGN_OR_RETURN(OutputStreamPoller poller,
-                   graph.AddOutputStreamPoller("tflite_prediction"));
+                   graph.AddOutputStreamPoller("matrix"));
   MP_RETURN_IF_ERROR(graph.StartRun({}));
 
 
@@ -93,9 +75,12 @@ absl::Status PrintNetworkOutput() {
 
   // Get output packets.
   LOG(INFO) << "Get output packets";
+  int counter = 0;
   while (poller.Next(&packet)) {
-    auto outputMatrix = packet.Get<Matrix>();
-    // LOG(INFO) << "outputMatrix: " << outputMatrix 
+    auto outputMatrix = packet.Get<std::vector<float>>();
+    counter ++;
+    LOG(INFO) << "Counter: " << counter ;
+    // LOG(INFO) << "outputMatrix: " << outputMatrix ;
     //           << " outputMatrix.size:" << outputMatrix.size()
     //           << " outputMatrix.rows:" << outputMatrix.rows()
     //           << " outputMatrix.cols:" << outputMatrix.cols();
