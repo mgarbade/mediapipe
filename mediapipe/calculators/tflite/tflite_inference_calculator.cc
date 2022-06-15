@@ -373,7 +373,7 @@ absl::Status TfLiteInferenceCalculator::GetContract(CalculatorContract* cc) {
 
   // Assign this calculator's default InputStreamHandler.
   cc->SetInputStreamHandler("FixedSizeInputStreamHandler");
-
+  LOG(INFO) << "TfLiteInferenceCalculator::GetContract Completed";
   return absl::OkStatus();
 }
 
