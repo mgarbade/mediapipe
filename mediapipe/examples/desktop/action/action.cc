@@ -32,7 +32,7 @@ absl::Status PrintNetworkOutput() {
   CalculatorGraphConfig config =
       ParseTextProtoOrDie<CalculatorGraphConfig>(R"pb(
         input_stream: "INPUT:in"
-        output_stream: "MATRIX:matrix"
+        output_stream: "TENSORS:tflite_prediction"
 
         node {
           calculator: "ActionCalculator"
@@ -55,10 +55,10 @@ absl::Status PrintNetworkOutput() {
         node {
           calculator: "TfLiteInferenceCalculator"
           input_stream: "TENSORS:landmark_tensors"
-          output_stream: "TENSORS:signn_predictions"
+          output_stream: "TENSORS:tflite_prediction"
           node_options: {
             [type.googleapis.com/mediapipe.TfLiteInferenceCalculatorOptions] {
-              model_path: "mediapipe/models/signn_dynamic.tflite"
+              model_path: "mediapipe/models/adder_model_single_input_2x3.tflite"
               delegate { xnnpack {} }
             }
           }
@@ -70,7 +70,7 @@ absl::Status PrintNetworkOutput() {
   LOG(INFO) << "MP_RETURN_IF_ERROR(graph.Initialize(config));";
   MP_RETURN_IF_ERROR(graph.Initialize(config));
   ASSIGN_OR_RETURN(OutputStreamPoller poller,
-                   graph.AddOutputStreamPoller("matrix"));
+                   graph.AddOutputStreamPoller("tflite_prediction"));
   MP_RETURN_IF_ERROR(graph.StartRun({}));
 
 

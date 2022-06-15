@@ -39,12 +39,14 @@ namespace mediapipe{
             std::vector<float> inputVectorFloat = cc->Inputs().Tag(VectorFloat).Get<std::vector<float>>();
 
             LOG(INFO) << "Matrix";
-            const int nrows = 60;
-            const int ncols = 42;
-            Eigen::Matrix matrix = Eigen::Matrix<float, nrows, ncols>();
-            // Matrix matrix;
-            // LOG(INFO) << "matrix.resize(" << nrows << ", " << ncols << ")";
-            // matrix.resize(nrows, ncols);
+            Matrix matrix;
+
+
+            int nrows = 2;
+            int ncols = 3;
+
+            LOG(INFO) << "matrix.resize(" << nrows << ", " << ncols << ")";
+            matrix.resize(nrows, ncols);
             LOG(INFO) << "matrix.resize(" << nrows << ", " << ncols << ") Completed";
             LOG(INFO) << "matrix.rows(): " << matrix.rows() << ", matrix.cols(): " << matrix.cols();
             LOG(INFO) << "matrix(0, 0): " << matrix(0, 0);
@@ -55,9 +57,8 @@ namespace mediapipe{
                 for (size_t j = 0; j < ncols; j++)
                 {
                     int index = i * ncols + j;
-                    // matrix(i, j) = inputVectorFloat.at(index);
-                    matrix(i, j) = index;
-                    // LOG(INFO) << "index: " << index << " matrix(i, j): " << matrix(i, j);
+                    matrix(i, j) = inputVectorFloat.at(index);
+                    LOG(INFO) << "index: " << index << " matrix(i, j): " << matrix(i, j);
                 }
             }
             LOG(INFO) << "matrix(0, 0): " << matrix(0, 0);
