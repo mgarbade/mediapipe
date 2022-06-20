@@ -31,43 +31,56 @@ absl::Status PrintNetworkOutput() {
   // Configures a simple graph, which concatenates 2 PassThroughCalculators.
   CalculatorGraphConfig config =
       ParseTextProtoOrDie<CalculatorGraphConfig>(R"pb(
-        input_stream: "INPUT:in"
-        output_stream: "MATRIX:matrix"
+        input_stream: "in"
+        output_stream: "out"
 
         node {
-          calculator: "ActionCalculator"
-          input_stream: "INPUT:in"
-          output_stream: "VECTOR_FLOAT:vector_float"
+          calculator: "MatrixToTensorCalculator"
+          input_stream: "in"
+          output_stream: "tensor_features"
         }
-
-        node {
-          calculator: "VectorToTensorCalculator"
-          input_stream: "VECTOR_FLOAT:vector_float"
+        node: {
+          calculator: "TensorToMatrixCalculator"
+          input_stream: "TENSOR:tensor_features"
           output_stream: "MATRIX:matrix"
         }
-
+        node {
+          calculator: "MatrixToVectorCalculator"
+          input_stream: "matrix"
+          output_stream: "out"
+        }
+        
       )pb");
 
   CalculatorGraph graph;
   LOG(INFO) << "MP_RETURN_IF_ERROR(graph.Initialize(config));";
   MP_RETURN_IF_ERROR(graph.Initialize(config));
   ASSIGN_OR_RETURN(OutputStreamPoller poller,
-                   graph.AddOutputStreamPoller("matrix"));
+                   graph.AddOutputStreamPoller("out"));
   MP_RETURN_IF_ERROR(graph.StartRun({}));
 
 
   // Give 10 input packets that contain the vector [1.0, 1.0].
-  LOG(INFO) <<"std::vector<float> inputVector;";
-  std::vector<float> inputVector;
-  for (size_t i = 0; i < 6; i++)
-  {
-    inputVector.push_back((float) i + 1);
-    // LOG(INFO) <<"inputVector[i]: " << std::to_string(inputVector[i]);
-  }
+  LOG(INFO) <<"Matrix inputMatrix;";
   
   for (int i = 0; i < 10; ++i) {
+
+    int nrows = 2;
+    int ncols = 3;
+    Matrix inputMatrix;
+    inputMatrix.resize(nrows, ncols);
+    for (size_t i = 0; i < nrows; i++)
+    {
+        for (size_t j = 0; j < ncols; j++)
+        {
+            int index = i * ncols + j;
+            inputMatrix(i, j) = (float) index;
+            LOG(INFO) << "index: " << index << " inputMatrix(i, j): " << inputMatrix(i, j);
+        }
+    }
+
     MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-        "in", MakePacket<std::vector<float>>(inputVector).At(Timestamp(i))));
+        "in", MakePacket<Matrix>(inputMatrix).At(Timestamp(i))));
   }
   // Close the input stream "in".
   MP_RETURN_IF_ERROR(graph.CloseInputStream("in"));
