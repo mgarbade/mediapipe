@@ -222,7 +222,7 @@ absl::Status TfLiteConverterCalculator::GetContract(CalculatorContract* cc) {
 
   // Assign this calculator's default InputStreamHandler.
   cc->SetInputStreamHandler("FixedSizeInputStreamHandler");
-
+  LOG(INFO) << "TfLiteConverterCalculator::GetContract Completed";
   return absl::OkStatus();
 }
 
