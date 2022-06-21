@@ -35,19 +35,32 @@ absl::Status PrintNetworkOutput() {
         output_stream: "out"
 
         node {
-          calculator: "MatrixToTensorCalculator"
-          input_stream: "in"
-          output_stream: "tensor_features"
+          calculator: "TfLiteConverterCalculator"
+          input_stream: "MATRIX:in"
+          output_stream: "TENSORS:image_tensor"
+          options: {
+            [mediapipe.TfLiteConverterCalculatorOptions.ext] {
+              zero_center: false
+            }
+          }
         }
-        node: {
-          calculator: "TensorToMatrixCalculator"
-          input_stream: "TENSOR:tensor_features"
-          output_stream: "MATRIX:matrix"
-        }
+
+
         node {
-          calculator: "MatrixToVectorCalculator"
-          input_stream: "matrix"
-          output_stream: "out"
+          calculator: "TfLiteInferenceCalculator"
+          input_stream: "TENSORS:image_tensor"
+          output_stream: "TENSORS:tensor_features"
+          options: {
+            [mediapipe.TfLiteInferenceCalculatorOptions.ext] {
+              model_path: "mediapipe/models/adder_model_single_input_2x3.tflite"
+            }
+          }
+        }
+
+        node {
+          calculator: "TfLiteTensorsToFloatsCalculator"
+          input_stream: "TENSORS:tensor_features"
+          output_stream: "FLOATS:out"
         }
         
       )pb");

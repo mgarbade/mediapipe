@@ -7,15 +7,16 @@ cc_binary(
     srcs = ["action.cc"],
     visibility = ["//visibility:public"],
     deps = [
-        "//mediapipe/calculators/action:action_calculator",
-        "//mediapipe/calculators/action:vector_to_tensor_calculator",
-        "//mediapipe/calculators/core:matrix_to_vector_calculator",
-        "//mediapipe/calculators/tensorflow:vector_float_to_tensor_calculator",
-        "//mediapipe/calculators/tensorflow:matrix_to_tensor_calculator",
-        "//mediapipe/calculators/tensorflow:tensor_to_matrix_calculator",
         "//mediapipe/calculators/tflite:tflite_converter_calculator",
         "//mediapipe/calculators/tflite:tflite_inference_calculator",
-        "//mediapipe/calculators/core:pass_through_calculator",
+        "//mediapipe/calculators/tflite:tflite_tensors_to_floats_calculator",
+        
+        # "//mediapipe/calculators/tensorflow:matrix_to_tensor_calculator",
+        # "//mediapipe/calculators/tensorflow:tensor_to_matrix_calculator",
+        # "//mediapipe/calculators/core:matrix_to_vector_calculator",
+
+        # "//mediapipe/calculators/core:pass_through_calculator",
+
         "//mediapipe/framework:calculator_graph",
         "//mediapipe/framework/port:logging",
         "//mediapipe/framework/port:parse_text_proto",
