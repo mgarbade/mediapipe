@@ -19,13 +19,13 @@ from tensorflow.keras import layers
 
 # # model with single input
 
-input1 = layers.Input(shape=(60,42))
+input1 = layers.Input(shape=(3, 4, 6))
 added = layers.Add()([input1, tf.ones_like(input1)])
 model = keras.models.Model(inputs=input1, outputs=added)
 
 # ### show inference
 
-model(tf.ones((1, 60, 42)))
+model(tf.ones((1, 3, 4, 6)))
 
 model(np.array([[1,2], [3,4], [5,6]]))
 
@@ -34,7 +34,7 @@ model(np.array([[1,2], [3,4], [5,6]]))
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 
-with open("adder_model_single_input_60x42.tflite", "wb") as file:
+with open("adder_model_single_input_3x4x6.tflite", "wb") as file:
     file.write(tflite_model)
 
 # ## Example inference using tflite model
