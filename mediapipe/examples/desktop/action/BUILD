@@ -18,7 +18,7 @@ cc_binary(
         # "//mediapipe/calculators/tensorflow:tensor_to_matrix_calculator",
         # "//mediapipe/calculators/core:matrix_to_vector_calculator",
 
-        "//mediapipe/calculators/core:pass_through_calculator",
+        # "//mediapipe/calculators/core:pass_through_calculator",
 
         "//mediapipe/framework:calculator_graph",
         "//mediapipe/framework/port:logging",
