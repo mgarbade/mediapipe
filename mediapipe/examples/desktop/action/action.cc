@@ -19,20 +19,69 @@
 #include "mediapipe/framework/port/parse_text_proto.h"
 #include "mediapipe/framework/port/status.h"
 #include "mediapipe/framework/formats/matrix.h"
+#include <opencv2/core/eigen.hpp>
 
 #include <iostream>
 #include <vector>
+#include <iterator>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <iomanip> // set precision of output string
+#include <opencv2/core/core.hpp> // OpenCV matrices for storing data
+
+using namespace std;
+using namespace cv;
 
 namespace mediapipe {
 
+void readMatAsciiWithHeader( const string& filename, Mat& matData)
+{
+    cout << "Create matrix from file :" << filename << endl;
+
+    ifstream inFileStream(filename.c_str());
+    if(!inFileStream){
+        cout << "File cannot be found" << endl;
+        exit(-1);
+    }
+
+    int rows, cols;
+    inFileStream >> rows;
+    inFileStream >> cols;
+    matData.create(rows,cols,CV_32F);
+    cout << "numRows: " << rows << "\t numCols: " << cols << endl;
+
+    matData.setTo(0);  // init all values to 0
+    float *dptr;
+    for(int ridx=0; ridx < matData.rows; ++ridx){
+        dptr = matData.ptr<float>(ridx);
+        for(int cidx=0; cidx < matData.cols; ++cidx, ++dptr){
+            inFileStream >> *dptr;
+        }
+    }
+    inFileStream.close();
+
+}
+
 absl::Status PrintNetworkOutput() {
+
+  LOG(INFO) << "Read data from ascii";
+  // string filename = "/media/data_ssd/libs/mediapipe_v0.8.9/notebooks/squat_neg_10x36.mat";
+  string filename = "/media/data_ssd/libs/mediapipe_v0.8.9/notebooks/squat_trans_36x10.mat";
+  // string filename = "/media/data_ssd/libs/mediapipe_v0.8.9/notebooks/skeletons_with_neck_squat_trans_36x79.mat";
+  Mat matData;
+  readMatAsciiWithHeader( filename, matData);
+
+  // convert opencv mat to eigen mat
+  // Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> matrixEigen(matData.ptr<float>(), matData.rows, matData.cols);
+
 
   LOG(INFO) << "PrintNetworkOutput";
   // Configures a simple graph, which concatenates 2 PassThroughCalculators.
   CalculatorGraphConfig config =
       ParseTextProtoOrDie<CalculatorGraphConfig>(R"pb(
-        input_stream: "in"
-        output_stream: "out"
+        input_stream: "MATRIX:in"
+        output_stream: "FLOATS:out"
 
         node {
           calculator: "TfLiteConverterCalculator"
@@ -45,14 +94,13 @@ absl::Status PrintNetworkOutput() {
           }
         }
 
-
         node {
           calculator: "TfLiteInferenceCalculator"
           input_stream: "TENSORS:image_tensor"
           output_stream: "TENSORS:tensor_features"
           options: {
             [mediapipe.TfLiteInferenceCalculatorOptions.ext] {
-              model_path: "mediapipe/models/adder_model_single_input_2x3.tflite"
+              model_path: "notebooks/model_ar_simple_squat_only.tflite"
             }
           }
         }
@@ -75,11 +123,13 @@ absl::Status PrintNetworkOutput() {
 
   // Give 10 input packets that contain the vector [1.0, 1.0].
   LOG(INFO) <<"Matrix inputMatrix;";
-  
-  for (int i = 0; i < 10; ++i) {
 
-    int nrows = 2;
-    int ncols = 3;
+  std::vector<Matrix> inputMatrices;
+
+  for (int i = 0; i < 100; ++i) {
+
+    int nrows = matData.rows;
+    int ncols = matData.cols;
     Matrix inputMatrix;
     inputMatrix.resize(nrows, ncols);
     for (size_t i = 0; i < nrows; i++)
@@ -87,14 +137,22 @@ absl::Status PrintNetworkOutput() {
         for (size_t j = 0; j < ncols; j++)
         {
             int index = i * ncols + j;
-            inputMatrix(i, j) = (float) index;
-            LOG(INFO) << "index: " << index << " inputMatrix(i, j): " << inputMatrix(i, j);
+            inputMatrix(i, j) = matData.at<float>(i, j);
+            // LOG(INFO) << "index: " << index << " inputMatrix(i, j): " << inputMatrix(i, j);
         }
     }
+    inputMatrices.push_back(inputMatrix);
 
-    MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-        "in", MakePacket<Matrix>(inputMatrix).At(Timestamp(i))));
   }
+
+  for (size_t i = 0; i < 10; i++)
+  {
+    MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+      "in", MakePacket<Matrix>(inputMatrices.at(i)).At(Timestamp(i))));
+  }
+
+
+
   // Close the input stream "in".
   MP_RETURN_IF_ERROR(graph.CloseInputStream("in"));
   mediapipe::Packet packet;
@@ -102,23 +160,20 @@ absl::Status PrintNetworkOutput() {
   // Get output packets.
   LOG(INFO) << "Get output packets";
   int counter = 0;
-  while (poller.Next(&packet)) {
-    auto outputMatrix = packet.Get<std::vector<float>>();
+  while (counter < 100) {
+
+    if (poller.Next(&packet)){
+      auto outputMatrix = packet.Get<std::vector<float>>();
+      LOG(INFO) << "outputMatrix: ";
+      for (auto item : outputMatrix)
+        LOG(INFO) << item << ", " ;
+    }
+    else{
+      LOG(INFO) << "Poller could not get package" ;
+    }
+
     counter ++;
-    LOG(INFO) << "Counter: " << counter ;
-    // LOG(INFO) << "outputMatrix: " << outputMatrix ;
-    //           << " outputMatrix.size:" << outputMatrix.size()
-    //           << " outputMatrix.rows:" << outputMatrix.rows()
-    //           << " outputMatrix.cols:" << outputMatrix.cols();
-    // std::vector<float> outputVectorFloat;
-
-    // outputVectorFloat.push_back(outputMatrix(0, 0));
-    // outputVectorFloat.push_back(outputMatrix(0, 1));
-
-    // std::string outputString1 = std::to_string(outputVectorFloat[0]);
-    // std::string outputString2 = std::to_string(outputVectorFloat[1]);
-    // LOG(INFO) << outputString1;
-    // LOG(INFO) << outputString2;
+    LOG(INFO) << "Counter: " << counter;
   }
   return graph.WaitUntilDone();
 }
