@@ -20,6 +20,8 @@ import pickle
 
 # # Import squat example input
 
+# load poses of a person doing squats and "non-squats" (neg)
+
 filename = "/home/garbade/libs/aisc/action-recognition/demos/skeletons_as_numpy.npy"
 filename_neg = "/home/garbade/libs/aisc/action-recognition/demos/skeletons_as_numpy_negative.npy"
 
@@ -63,13 +65,6 @@ def add_neck_to_keypoints(skeletons):
         new_skeletons.append(pose_concat)
     return np.array(new_skeletons)
 
-
-
-nose.shape
-
-neck.shape
-
-rest.shape
 
 skeletons_corr = add_neck_to_keypoints(data)
 skeletons_corr_neg = add_neck_to_keypoints(data_neg)
@@ -121,6 +116,10 @@ output_data
 output_data.shape
 
 output_data.argmax(axis=0)
+
+np.max(output_data,axis=0)
+
+np.min(output_data,axis=0)
 
 # # Get action class corresponding to prediction
 
@@ -233,24 +232,13 @@ def write_matrix2D_to_ascii(filename, matrix2D):
             file.write("\n")
 
 
-
-for channel in range(nchannels):
-    for col in range(ncols):
-        print(input_data[0, col, channel])
-
-print(row)
-print(channel)
-print(col)
-
-row.shape
-
-kpt.shape
-
 write_matrix3D_to_ascii("skeletons_with_neck_squat_79x18x2.mat", input_data)
 
 write_matrix2D_to_ascii("skeletons_with_neck_squat_79x36.mat", input_data_2D)
 
-# !pwd
+# transpose input data -> needed by tflite / eigen matrix
+
+write_matrix2D_to_ascii("skeletons_with_neck_squat_trans_36x79.mat", np.transpose(input_data_2D))
 
 # # Compute class for C++ output prediction
 
@@ -324,6 +312,11 @@ data_train_neg = create_multiple_samples(train_neg, frames_per_sample=frames_per
 print(data_train_pos.shape)
 print(data_train_neg.shape)
 
+num_samples = 1000
+data_train_pos = data_train_pos[:num_samples,:,:]
+data_train_neg = data_train_neg[:num_samples,:,:]
+
+
 x_train = np.concatenate((data_train_pos, data_train_neg), axis=0)
 
 x_train.shape
@@ -338,35 +331,6 @@ print(y_train.shape)
 
 # # Train simple AR model
 
-# simple dense model
-
-# +
-# model = tf.keras.models.Sequential([
-#     tf.keras.layers.Flatten(input_shape=(frames_per_sample, 36)),
-#     tf.keras.layers.Dense(128, activation="relu"),
-#     tf.keras.layers.Dropout(0.2),
-#     tf.keras.layers.Dense(2)
-# ])
-
-# +
-# loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-# -
-
-# conv 1d model
-
-# +
-# model = tf.keras.models.Sequential([
-#     tf.keras.layers.Conv1D(filters=32, kernel_size=3, padding="valid"),
-#     tf.keras.layers.Dropout(0.2),
-#     tf.keras.layers.Dense(2)
-# ])
-
-# +
-# model.compile(optimizer='adam',
-#              loss=loss_fn,
-#              metrics=['accuracy'])
-# -
-
 # conv 1d model - second try
 
 from tensorflow.keras.layers import *
@@ -374,6 +338,7 @@ from tensorflow.keras.models import Sequential
 
 n_timesteps, n_features = (frames_per_sample, 36)
 n_outputs = 2
+print(f"n_timesteps, n_features, n_ouputs: {n_timesteps}, {n_features}, {n_outputs}")
 
 model = Sequential()
 model.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(n_timesteps,n_features)))
@@ -389,36 +354,50 @@ np.expand_dims(y_train, axis=1).shape
 
 model.summary()
 
-class_weight = {0: 300.,
+class_weight = {0: 1.,
                 1: 1.}
 
-model.fit(x_train, y_train, batch_size = 30, epochs=15, class_weight=class_weight)
+model.fit(x_train, y_train, batch_size = 5, epochs=10, class_weight=class_weight)
 
 # # Test trained model
 
-result = model(x_train[100:5])
-result
+# test on first 5 training samples
 
-result = model(x_train[-5:])
-result
+np.squeeze(x_train[:1]).shape
 
-# add softmax to model
-
-probability_model = tf.keras.Sequential([
-    model,
-    tf.keras.layers.Softmax()
-])
-
-result = probability_model(x_train[-5:])
-result
-
-y_train[-5:]
-
-result = probability_model(x_train[:5])
+result = model(x_train[:5])
 result
 
 y_train[:5]
 
+# test on last 5 training samples
 
+result = model(x_train[-5:])
+result
+
+y_train[-5:]
+
+# # Save toy input for NN inference
+
+matrix2D = np.squeeze(x_train[:1])
+write_matrix2D_to_ascii("squat_10x36.mat", matrix2D)
+
+matrix2D = np.squeeze(x_train[-1:])
+write_matrix2D_to_ascii("squat_neg_10x36.mat", matrix2D)
+
+# # Save model as tflite
+
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+
+with open("model_ar_simple_squat_only.tflite", "wb") as file:
+    file.write(tflite_model)
+
+# !pwd
+
+# # Save transposed input
+
+matrix2D = np.squeeze(x_train[:1])
+write_matrix2D_to_ascii("squat_trans_36x10.mat", np.transpose(matrix2D))
 
 
