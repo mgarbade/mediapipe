@@ -67,8 +67,8 @@ absl::Status PrintNetworkOutput() {
 
   LOG(INFO) << "Read data from ascii";
   // string filename = "/media/data_ssd/libs/mediapipe_v0.8.9/notebooks/squat_neg_10x36.mat";
-  string filename = "/media/data_ssd/libs/mediapipe_v0.8.9/notebooks/squat_trans_36x10.mat";
-  // string filename = "/media/data_ssd/libs/mediapipe_v0.8.9/notebooks/skeletons_with_neck_squat_trans_36x79.mat";
+  // string filename = "/media/data_ssd/libs/mediapipe_v0.8.9/notebooks/squat_trans_36x10.mat";
+  string filename = "/media/data_ssd/libs/mediapipe_v0.8.9/notebooks/skeletons_with_neck_squat_trans_36x79.mat";
   Mat matData;
   readMatAsciiWithHeader( filename, matData);
 
@@ -100,7 +100,7 @@ absl::Status PrintNetworkOutput() {
           output_stream: "TENSORS:tensor_features"
           options: {
             [mediapipe.TfLiteInferenceCalculatorOptions.ext] {
-              model_path: "notebooks/model_ar_simple_squat_only.tflite"
+              model_path: "mediapipe/models/model_ar_v18s_01_mediapipe_tflite.tflite"
             }
           }
         }
