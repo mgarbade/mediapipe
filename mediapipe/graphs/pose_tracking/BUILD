@@ -41,6 +41,7 @@ mediapipe_binary_graph(
 cc_library(
     name = "pose_tracking_cpu_deps",
     deps = [
+        "//mediapipe/calculators/util:landmarks_to_floats_calculator",
         "//mediapipe/calculators/core:constant_side_packet_calculator",
         "//mediapipe/calculators/core:flow_limiter_calculator",
         "//mediapipe/graphs/pose_tracking/subgraphs:pose_renderer_cpu",
