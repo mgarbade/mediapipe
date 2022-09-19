@@ -6,7 +6,7 @@ input_stream: "input_video"
 # Output image with rendered results. (ImageFrame)
 output_stream: "output_video"
 # Pose landmarks. (NormalizedLandmarkList)
-output_stream: "pose_landmarks"
+output_stream: "pose_landmark_floats"
 
 # Generates side packet to enable segmentation.
 node {
@@ -60,4 +60,12 @@ node {
   input_stream: "DETECTION:pose_detection"
   input_stream: "ROI:roi_from_landmarks"
   output_stream: "IMAGE:output_video"
+}
+
+
+# Convert LANDMARKS to FLOATS or MATRIX (for faster transfer to Unity)
+node {
+   calculator: "LandmarksToFloatsCalculator"
+   input_stream: "NORM_LANDMARKS:pose_landmarks"
+   output_stream: "FLOATS:pose_landmark_floats"
 }

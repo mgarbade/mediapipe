@@ -29,6 +29,7 @@
 
 constexpr char kInputStream[] = "input_video";
 constexpr char kOutputStream[] = "output_video";
+constexpr char landmarksFloatsStream[] = "pose_landmark_floats";
 constexpr char kWindowName[] = "MediaPipe";
 
 ABSL_FLAG(std::string, calculator_graph_config_file, "",
@@ -77,8 +78,12 @@ absl::Status RunMPPGraph() {
   }
 
   LOG(INFO) << "Start running the calculator graph.";
+
+  // Add output pollers for video and floats
   ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
                    graph.AddOutputStreamPoller(kOutputStream));
+  ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller_floats,
+                   graph.AddOutputStreamPoller(landmarksFloatsStream));                   
   MP_RETURN_IF_ERROR(graph.StartRun({}));
 
   LOG(INFO) << "Start grabbing and processing frames.";
@@ -118,7 +123,13 @@ absl::Status RunMPPGraph() {
     // Get the graph result packet, or stop if that fails.
     mediapipe::Packet packet;
     if (!poller.Next(&packet)) break;
+
+    // Get landmarks as floats
+    mediapipe::Packet packet_floats;
+    if (!poller_floats.Next(&packet_floats)) break;
+
     auto& output_frame = packet.Get<mediapipe::ImageFrame>();
+    auto& output_floats = packet_floats.Get<std::vector<float>>();
 
     // Convert back to opencv for display or saving.
     cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
