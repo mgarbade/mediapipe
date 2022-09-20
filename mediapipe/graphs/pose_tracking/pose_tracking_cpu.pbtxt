@@ -46,6 +46,7 @@ node {
   input_side_packet: "ENABLE_SEGMENTATION:enable_segmentation"
   input_stream: "IMAGE:throttled_input_video"
   output_stream: "LANDMARKS:pose_landmarks"
+  output_stream: "WORLD_LANDMARKS:pose_world_landmarks"
   output_stream: "SEGMENTATION_MASK:segmentation_mask"
   output_stream: "DETECTION:pose_detection"
   output_stream: "ROI_FROM_LANDMARKS:roi_from_landmarks"
@@ -66,6 +67,11 @@ node {
 # Convert LANDMARKS to FLOATS or MATRIX (for faster transfer to Unity)
 node {
    calculator: "LandmarksToFloatsCalculator"
-   input_stream: "NORM_LANDMARKS:pose_landmarks"
+   input_stream: "LANDMARKS:pose_world_landmarks"
    output_stream: "FLOATS:pose_landmark_floats"
+   node_options: {
+     [type.googleapis.com/mediapipe.LandmarksToFloatsCalculatorOptions] {
+       num_dimensions: 3
+     }
+   }
 }
