@@ -6,7 +6,8 @@ input_stream: "input_video"
 # Output image with rendered results. (ImageFrame)
 output_stream: "output_video"
 # Pose landmarks. (NormalizedLandmarkList)
-output_stream: "pose_landmarks"
+output_stream: "pose_landmark_floats"
+output_stream: "pose_world_landmark_floats"
 
 # Generates side packet to enable segmentation.
 node {
@@ -46,6 +47,7 @@ node {
   input_side_packet: "ENABLE_SEGMENTATION:enable_segmentation"
   input_stream: "IMAGE:throttled_input_video"
   output_stream: "LANDMARKS:pose_landmarks"
+  output_stream: "WORLD_LANDMARKS:pose_world_landmarks"
   output_stream: "SEGMENTATION_MASK:segmentation_mask"
   output_stream: "DETECTION:pose_detection"
   output_stream: "ROI_FROM_LANDMARKS:roi_from_landmarks"
@@ -60,4 +62,28 @@ node {
   input_stream: "DETECTION:pose_detection"
   input_stream: "ROI:roi_from_landmarks"
   output_stream: "IMAGE:output_video"
+}
+
+
+# Convert LANDMARKS to FLOATS or MATRIX (for faster transfer to Unity)
+node {
+   calculator: "LandmarksToFloatsCalculator"
+   input_stream: "NORM_LANDMARKS:pose_landmarks"
+   output_stream: "FLOATS:pose_landmark_floats"
+   node_options: {
+     [type.googleapis.com/mediapipe.LandmarksToFloatsCalculatorOptions] {
+       num_dimensions: 2
+     }
+   }
+}
+
+node {
+   calculator: "LandmarksToFloatsCalculator"
+   input_stream: "LANDMARKS:pose_world_landmarks"
+   output_stream: "FLOATS:pose_world_landmark_floats"
+   node_options: {
+     [type.googleapis.com/mediapipe.LandmarksToFloatsCalculatorOptions] {
+       num_dimensions: 3
+     }
+   }
 }

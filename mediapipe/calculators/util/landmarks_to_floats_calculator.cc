@@ -41,6 +41,7 @@ namespace mediapipe {
 namespace {
 
 constexpr char kLandmarksTag[] = "NORM_LANDMARKS";
+constexpr char kWorldLandmarksTag[] = "LANDMARKS";
 constexpr char kFloatsTag[] = "FLOATS";
 constexpr char kMatrixTag[] = "MATRIX";
 
@@ -63,7 +64,15 @@ constexpr char kMatrixTag[] = "MATRIX";
 class LandmarksToFloatsCalculator : public CalculatorBase {
  public:
   static absl::Status GetContract(CalculatorContract* cc) {
-    cc->Inputs().Tag(kLandmarksTag).Set<NormalizedLandmarkList>();
+
+    RET_CHECK(cc->Inputs().HasTag(kLandmarksTag) ^
+          cc->Inputs().HasTag(kWorldLandmarksTag));
+    if (cc->Inputs().HasTag(kLandmarksTag)) {
+      cc->Inputs().Tag(kLandmarksTag).Set<NormalizedLandmarkList>();
+    }
+    if (cc->Inputs().HasTag(kWorldLandmarksTag)) {
+      cc->Inputs().Tag(kWorldLandmarksTag).Set<LandmarkList>();
+    }          
     RET_CHECK(cc->Outputs().HasTag(kFloatsTag) ||
               cc->Outputs().HasTag(kMatrixTag));
     if (cc->Outputs().HasTag(kFloatsTag)) {
@@ -88,45 +97,89 @@ class LandmarksToFloatsCalculator : public CalculatorBase {
   }
 
   absl::Status Process(CalculatorContext* cc) override {
-    // Only process if there's input landmarks.
-    if (cc->Inputs().Tag(kLandmarksTag).IsEmpty()) {
-      return absl::OkStatus();
-    }
+    if (cc->Inputs().HasTag(kLandmarksTag)) {
 
-    const auto& input_landmarks =
-        cc->Inputs().Tag(kLandmarksTag).Get<NormalizedLandmarkList>();
-
-    if (cc->Outputs().HasTag(kFloatsTag)) {
-      auto output_floats = absl::make_unique<std::vector<float>>();
-      for (int i = 0; i < input_landmarks.landmark_size(); ++i) {
-        const NormalizedLandmark& landmark = input_landmarks.landmark(i);
-        output_floats->emplace_back(landmark.x());
-        if (num_dimensions_ > 1) {
-          output_floats->emplace_back(landmark.y());
-        }
-        if (num_dimensions_ > 2) {
-          output_floats->emplace_back(landmark.z());
-        }
+      // Only process if there's input landmarks.
+      if (cc->Inputs().Tag(kLandmarksTag).IsEmpty()) {
+        return absl::OkStatus();
       }
 
-      cc->Outputs()
-          .Tag(kFloatsTag)
-          .Add(output_floats.release(), cc->InputTimestamp());
-    } else {
-      auto output_matrix = absl::make_unique<Matrix>();
-      output_matrix->setZero(num_dimensions_, input_landmarks.landmark_size());
-      for (int i = 0; i < input_landmarks.landmark_size(); ++i) {
-        (*output_matrix)(0, i) = input_landmarks.landmark(i).x();
-        if (num_dimensions_ > 1) {
-          (*output_matrix)(1, i) = input_landmarks.landmark(i).y();
+      const auto& input_landmarks =
+          cc->Inputs().Tag(kLandmarksTag).Get<NormalizedLandmarkList>();
+
+      if (cc->Outputs().HasTag(kFloatsTag)) {
+        auto output_floats = absl::make_unique<std::vector<float>>();
+        for (int i = 0; i < input_landmarks.landmark_size(); ++i) {
+          const NormalizedLandmark& landmark = input_landmarks.landmark(i);
+          output_floats->emplace_back(landmark.x());
+          if (num_dimensions_ > 1) {
+            output_floats->emplace_back(landmark.y());
+          }
+          if (num_dimensions_ > 2) {
+            output_floats->emplace_back(landmark.z());
+          }
         }
-        if (num_dimensions_ > 2) {
-          (*output_matrix)(2, i) = input_landmarks.landmark(i).z();
+
+        cc->Outputs()
+            .Tag(kFloatsTag)
+            .Add(output_floats.release(), cc->InputTimestamp());
+      } else {
+        auto output_matrix = absl::make_unique<Matrix>();
+        output_matrix->setZero(num_dimensions_, input_landmarks.landmark_size());
+        for (int i = 0; i < input_landmarks.landmark_size(); ++i) {
+          (*output_matrix)(0, i) = input_landmarks.landmark(i).x();
+          if (num_dimensions_ > 1) {
+            (*output_matrix)(1, i) = input_landmarks.landmark(i).y();
+          }
+          if (num_dimensions_ > 2) {
+            (*output_matrix)(2, i) = input_landmarks.landmark(i).z();
+          }
         }
+        cc->Outputs()
+            .Tag(kMatrixTag)
+            .Add(output_matrix.release(), cc->InputTimestamp());
       }
-      cc->Outputs()
-          .Tag(kMatrixTag)
-          .Add(output_matrix.release(), cc->InputTimestamp());
+    } else if (cc->Inputs().HasTag(kWorldLandmarksTag)){
+            // Only process if there's input landmarks.
+      if (cc->Inputs().Tag(kWorldLandmarksTag).IsEmpty()) {
+        return absl::OkStatus();
+      }
+
+      const auto& input_landmarks =
+          cc->Inputs().Tag(kWorldLandmarksTag).Get<LandmarkList>();
+
+      if (cc->Outputs().HasTag(kFloatsTag)) {
+        auto output_floats = absl::make_unique<std::vector<float>>();
+        for (int i = 0; i < input_landmarks.landmark_size(); ++i) {
+          const Landmark& landmark = input_landmarks.landmark(i);
+          output_floats->emplace_back(landmark.x());
+          if (num_dimensions_ > 1) {
+            output_floats->emplace_back(landmark.y());
+          }
+          if (num_dimensions_ > 2) {
+            output_floats->emplace_back(landmark.z());
+          }
+        }
+
+        cc->Outputs()
+            .Tag(kFloatsTag)
+            .Add(output_floats.release(), cc->InputTimestamp());
+      } else {
+        auto output_matrix = absl::make_unique<Matrix>();
+        output_matrix->setZero(num_dimensions_, input_landmarks.landmark_size());
+        for (int i = 0; i < input_landmarks.landmark_size(); ++i) {
+          (*output_matrix)(0, i) = input_landmarks.landmark(i).x();
+          if (num_dimensions_ > 1) {
+            (*output_matrix)(1, i) = input_landmarks.landmark(i).y();
+          }
+          if (num_dimensions_ > 2) {
+            (*output_matrix)(2, i) = input_landmarks.landmark(i).z();
+          }
+        }
+        cc->Outputs()
+            .Tag(kMatrixTag)
+            .Add(output_matrix.release(), cc->InputTimestamp());
+      }
     }
     return absl::OkStatus();
   }
