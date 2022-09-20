@@ -6,7 +6,6 @@
     "configurations": 
     [
       {
-        "preLaunchTask": "Bazel Build (Debug)",
         "name": "PsTrck CodeLLDB",
         "type": "lldb",
         "request": "launch",
