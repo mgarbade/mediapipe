@@ -567,3 +567,9 @@ cc_test(
         "@org_tensorflow//tensorflow/lite:framework",
     ],
 )
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
+)

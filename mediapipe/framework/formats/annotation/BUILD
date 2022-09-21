@@ -38,5 +38,5 @@ mediapipe_proto_library(
 filegroup(
     name = "protos_src",
     srcs = glob(["*.proto"]),
-    visibility = ["//mediapipe:__subpackages__"],
+    visibility = ["//visibility:public"],
 )

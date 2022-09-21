@@ -33,3 +33,9 @@ mediapipe_cc_proto_library(
     visibility = ["//visibility:public"],
     deps = [":anchor_proto"],
 )
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
+)

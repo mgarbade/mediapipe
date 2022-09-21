@@ -1479,3 +1479,9 @@ cc_test(
         "@com_google_absl//absl/strings",
     ],
 )
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
+)

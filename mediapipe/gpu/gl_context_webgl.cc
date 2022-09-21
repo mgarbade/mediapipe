@@ -50,6 +50,10 @@ absl::Status GlContext::CreateContextInternal(
     EMSCRIPTEN_WEBGL_CONTEXT_HANDLE external_context, int webgl_version) {
   CHECK(webgl_version == 1 || webgl_version == 2);
 
+  if (external_context != 0) {
+    LOG(WARNING) << "external context is not supported, so it may not work correctly";
+  }
+
   EmscriptenWebGLContextAttributes attrs;
   emscripten_webgl_init_context_attributes(&attrs);
   attrs.explicitSwapControl = 0;
@@ -77,37 +81,33 @@ absl::Status GlContext::CreateContextInternal(
   //   and OFFSCREEN_FRAMEBUFFER)
   // clang-format off
   EM_ASM(
-    let init_once = true;
-    if (init_once) {
-      const cachedFindCanvasEventTarget = findCanvasEventTarget;
+    let canvas = null;
 
-      if (typeof cachedFindCanvasEventTarget !== 'function') {
-        if (typeof console !== 'undefined') {
-          console.error('Expected Emscripten global function '
-              + '"findCanvasEventTarget" not found. WebGL context creation '
-              + 'may fail.');
-        }
-        return;
+    if (typeof findCanvasEventTarget != 'function') {
+      if (typeof console !== 'undefined') {
+        console.error('Expected Emscripten global function '
+            + '"findCanvasEventTarget" not found. WebGL context creation '
+            + 'may fail.');
       }
+      return;
+    }
+
+    if (typeof findCanvasEventTarget.cached != 'function') {
+      const cachedFindCanvasEventTarget = findCanvasEventTarget;
 
       findCanvasEventTarget = function(target) {
         if (target == 0) {
-          if (Module && Module.canvas) {
-            return Module.canvas;
-          } else if (Module && Module.canvasCssSelector) {
-            return cachedFindCanvasEventTarget(Module.canvasCssSelector);
+          if (canvas === null) {
+            canvas = document.createElement('canvas');
           }
-          if (typeof console !== 'undefined') {
-            console.warn('Module properties canvas and canvasCssSelector not ' +
-                         'found during WebGL context creation.');
-          }
+          return canvas;
         }
         // We still go through with the find attempt, although for most use
         // cases it will not succeed, just in case the user does want to fall-
         // back.
         return cachedFindCanvasEventTarget(target);
       };  // NOLINT: Necessary semicolon.
-      init_once = false;
+      findCanvasEventTarget.cached = cachedFindCanvasEventTarget;
     }
   );
   // clang-format on

@@ -142,6 +142,10 @@ GlTexture GlCalculatorHelper::CreateDestinationTexture(int output_width,
   return impl_->CreateDestinationTexture(output_width, output_height, format);
 }
 
+GlTexture GlCalculatorHelper::CreateDestinationTexture(GpuBuffer& pixel_buffer) {
+  return impl_->CreateDestinationTexture(pixel_buffer);
+}
+
 GlContext& GlCalculatorHelper::GetGlContext() const {
   return impl_->GetGlContext();
 }

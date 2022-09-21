@@ -26,7 +26,7 @@
 #include "mediapipe/framework/formats/tensor.h"
 #include "mediapipe/framework/port/ret_check.h"
 #include "mediapipe/util/resource_util.h"
-#if defined(MEDIAPIPE_MOBILE)
+#if defined(MEDIAPIPE_ANDROID)
 #include "mediapipe/util/android/file/base/file.h"
 #include "mediapipe/util/android/file/base/helpers.h"
 #else

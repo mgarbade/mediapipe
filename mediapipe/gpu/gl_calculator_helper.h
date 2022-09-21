@@ -154,6 +154,8 @@ class GlCalculatorHelper {
       int output_width, int output_height,
       GpuBufferFormat format = GpuBufferFormat::kBGRA32);
 
+  GlTexture CreateDestinationTexture(GpuBuffer& pixel_buffer);
+
   // The OpenGL name of the output framebuffer.
   GLuint framebuffer() const;
 

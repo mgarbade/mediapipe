@@ -553,3 +553,9 @@ cc_test(
         "//mediapipe/framework/port:status",
     ],
 )
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
+)

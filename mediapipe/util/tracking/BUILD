@@ -801,3 +801,9 @@ cc_library(
         "@com_google_absl//absl/container:node_hash_map",
     ],
 )
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
+)

@@ -14,6 +14,10 @@ input_side_packet: "USE_PREV_LANDMARKS:use_prev_landmarks"
 
 # Collection of detected 3D objects, represented as a FrameAnnotation.
 output_stream: "FRAME_ANNOTATION:detected_objects"
+# Collection of box landmarks. (NormalizedLandmarkList)
+output_stream: "MULTI_LANDMARKS:multi_box_landmarks"
+# Crop rectangles derived from bounding box landmarks.
+output_stream: "NORM_RECTS:box_rects"
 
 # When the optional input side packet "use_prev_landmarks" is either absent or
 # set to true, uses the landmarks on the previous image to help localize

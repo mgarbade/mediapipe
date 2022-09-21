@@ -104,6 +104,7 @@ def _encode_binary_proto_impl(ctx):
                 "--encode=" + ctx.attr.message_type,
                 "--proto_path=" + ctx.genfiles_dir.path,
                 "--proto_path=" + ctx.bin_dir.path,
+                "--proto_path=" + ctx.file.input.owner.workspace_root,
                 "--proto_path=.",
             ] + path_list + file_list +
             ["<", textpb.path, ">", binarypb.path],

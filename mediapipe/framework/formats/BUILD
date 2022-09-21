@@ -327,7 +327,7 @@ mediapipe_register_type(
 filegroup(
     name = "protos_src",
     srcs = glob(["*.proto"]),
-    visibility = ["//mediapipe:__subpackages__"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(

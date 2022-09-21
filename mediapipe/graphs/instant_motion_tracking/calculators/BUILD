@@ -82,3 +82,9 @@ cc_library(
     ],
     alwayslink = 1,
 )
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
+)

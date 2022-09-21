@@ -44,3 +44,9 @@ mediapipe_proto_library(
     name = "mesh_3d_proto",
     srcs = ["mesh_3d.proto"],
 )
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
+)

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Modified to enable to specify the target GpuBuffer
+
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/framework/formats/image.h"
 #include "mediapipe/framework/port/ret_check.h"
@@ -68,6 +70,7 @@ using Image = mediapipe::Image;
 //   existing calculator options, depending on field merge_fields.
 //   OUTPUT_DIMENSIONS: the output width and height in pixels.
 //   ROTATION: the counterclockwise rotation angle in degrees.
+//   DESTINATION: the target GpuBuffer
 // These can also be specified as options.
 // To enable horizontal or vertical flip, specify them in options.
 // The flipping is applied after rotation.
@@ -92,6 +95,7 @@ class GlScalerCalculator : public CalculatorBase {
 
  private:
   GlCalculatorHelper helper_;
+  GpuBuffer dst_buffer_;
   int dst_width_ = 0;
   int dst_height_ = 0;
   float dst_scale_ = -1.f;
@@ -128,6 +132,9 @@ absl::Status GlScalerCalculator::GetContract(CalculatorContract* cc) {
   }
   MP_RETURN_IF_ERROR(GlCalculatorHelper::UpdateContract(cc));
 
+  if (cc->InputSidePackets().HasTag("DESTINATION")) {
+    cc->InputSidePackets().Tag("DESTINATION").Set<GpuBuffer>();
+  }
   if (cc->InputSidePackets().HasTag(kOptionsTag)) {
     cc->InputSidePackets().Tag(kOptionsTag).Set<GlScalerCalculatorOptions>();
   }
@@ -194,6 +201,11 @@ absl::Status GlScalerCalculator::Open(CalculatorContext* cc) {
     dst_width_ = dimensions[0];
     dst_height_ = dimensions[1];
   }
+  if (HasTagOrIndex(cc->InputSidePackets(), "DESTINATION", 1)) {
+    dst_buffer_ = cc->InputSidePackets().Tag("DESTINATION").Get<GpuBuffer>();
+    dst_width_ = dst_buffer_.width();
+    dst_height_ = dst_buffer_.height();
+  }
   if (cc->InputSidePackets().HasTag(kRotationTag)) {
     rotation_ccw = cc->InputSidePackets().Tag(kRotationTag).Get<int>();
   }
@@ -204,7 +216,7 @@ absl::Status GlScalerCalculator::Open(CalculatorContext* cc) {
 }
 
 absl::Status GlScalerCalculator::Process(CalculatorContext* cc) {
-  if (cc->Inputs().HasTag(kOutputDimensionsTag)) {
+  if (!dst_buffer_ && cc->Inputs().HasTag(kOutputDimensionsTag)) {
     if (cc->Inputs().Tag(kOutputDimensionsTag).IsEmpty()) {
       // OUTPUT_DIMENSIONS input stream is specified, but value is missing.
       return absl::OkStatus();
@@ -286,9 +298,18 @@ absl::Status GlScalerCalculator::Process(CalculatorContext* cc) {
               MakePacket<float>(left_right_padding).At(cc->InputTimestamp()));
     }
 
-    auto dst = helper_.CreateDestinationTexture(dst_width, dst_height,
-                                                GetOutputFormat());
-
+    GlTexture dst;
+#if MEDIAPIPE_GPU_BUFFER_USE_CV_PIXEL_BUFFER
+    // for iOS
+    dst = helper_.CreateDestinationTexture(dst_width, dst_height, GetOutputFormat());
+#else
+    if (dst_buffer_) {
+      dst_buffer_.internal_storage<mediapipe::GlTextureBuffer>()->Reuse();
+      dst = helper_.CreateDestinationTexture(dst_buffer_);
+    } else {
+      dst = helper_.CreateDestinationTexture(dst_width, dst_height, GetOutputFormat());
+    }
+#endif
     helper_.BindFramebuffer(dst);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(src1.target(), src1.name());

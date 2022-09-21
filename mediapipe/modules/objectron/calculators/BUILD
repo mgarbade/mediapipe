@@ -199,6 +199,15 @@ cc_library(
     hdrs = [
         "tensor_util.h",
     ],
+    copts = select({
+        # Needed for "//mediapipe/framework/formats:tensor" compatibility on Apple
+        # platforms for Metal pulled in via the tensor.h header.
+        "//mediapipe:apple": [
+            "-x objective-c++",
+            "-fobjc-arc",  # enable reference-counting
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         "//mediapipe/framework/formats:tensor",
         "//mediapipe/framework/port:logging",
@@ -314,6 +323,15 @@ cc_library(
     name = "lift_2d_frame_annotation_to_3d_calculator",
     srcs = ["lift_2d_frame_annotation_to_3d_calculator.cc"],
     visibility = ["//visibility:public"],
+    copts = select({
+        # Needed for "//mediapipe/framework/formats:tensor" compatibility on Apple
+        # platforms for Metal pulled in via the tensor.h header.
+        "//mediapipe:apple": [
+            "-x objective-c++",
+            "-fobjc-arc",  # enable reference-counting
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         ":annotation_cc_proto",
         ":belief_decoder_config_cc_proto",
@@ -421,4 +439,10 @@ cc_test(
         "//mediapipe/util/tracking:box_tracker_cc_proto",
         "@com_google_absl//absl/container:flat_hash_set",
     ],
+)
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
 )

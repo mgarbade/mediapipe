@@ -27,6 +27,7 @@ namespace mediapipe {
 
 namespace {
 ResourceProviderFn resource_provider_ = nullptr;
+PathResolverFn path_resolver_ = nullptr;
 }  // namespace
 
 absl::Status GetResourceContents(const std::string& path, std::string* output,
@@ -37,8 +38,19 @@ absl::Status GetResourceContents(const std::string& path, std::string* output,
   return internal::DefaultGetResourceContents(path, output, read_as_binary);
 }
 
+absl::StatusOr<std::string> PathToResourceAsFile(const std::string& path) {
+  if (path_resolver_ == nullptr) {
+    return internal::DefaultPathToResourceAsFile(path);
+  }
+  return path_resolver_(path);
+}
+
 void SetCustomGlobalResourceProvider(ResourceProviderFn fn) {
   resource_provider_ = std::move(fn);
+}
+
+void SetCustomGlobalPathResolver(PathResolverFn fn) {
+  path_resolver_ = std::move(fn);
 }
 
 }  // namespace mediapipe

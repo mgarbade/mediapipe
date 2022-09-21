@@ -37,6 +37,7 @@ selects.config_setting_group(
     name = "compute_shader_unavailable",
     match_any = [
         "//mediapipe/gpu:disable_gpu",
+        "//mediapipe:emscripten",
     ],
 )
 
@@ -97,7 +98,12 @@ cc_library(
         "@org_tensorflow//tensorflow/lite:framework_stable",
         "@org_tensorflow//tensorflow/lite/delegates/gpu:gl_delegate",
         "@org_tensorflow//tensorflow/lite/delegates/gpu/common:shape",
-    ],
+    ] + select({
+        "//mediapipe:android": [
+            "//mediapipe/util/android/file/base",
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = 1,
 )
 
@@ -579,6 +585,11 @@ cc_library(
             "//mediapipe/gpu:MPPMetalHelper",
             "//mediapipe/gpu:gpu_buffer",
         ],
+        "//mediapipe:emscripten": [
+            ":image_to_tensor_converter_gl_texture",
+            "//mediapipe/gpu:gl_calculator_helper",
+            "//mediapipe/gpu:gpu_buffer",
+        ],
         "//conditions:default": [
             ":image_to_tensor_converter_gl_buffer",
             "//mediapipe/gpu:gl_calculator_helper",
@@ -892,4 +903,10 @@ cc_library(
         ],
     }),
     alwayslink = 1,
+)
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
 )

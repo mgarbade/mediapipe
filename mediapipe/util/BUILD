@@ -174,13 +174,8 @@ cc_library(
     srcs = [
         "resource_util.cc",
         "resource_util_internal.h",
-    ] + select({
-        "//conditions:default": ["resource_util_default.cc"],
-        "//mediapipe:android": ["resource_util_android.cc"],
-        "//mediapipe/framework:android_no_jni": ["resource_util_loonix.cc"],
-        "//mediapipe:ios": ["resource_util_apple.cc"],
-        "//mediapipe:macos": ["resource_util_default.cc"],
-    }),
+        "resource_util_unity.cc",
+    ],
     hdrs = [
         "resource_util.h",
     ],
@@ -204,20 +199,7 @@ cc_library(
         "//mediapipe/framework/port:statusor",
         "//mediapipe/framework/port:file_helpers",
         "@com_google_absl//absl/strings",
-    ] + select({
-        "//conditions:default": [
-            "@com_google_absl//absl/flags:flag",
-        ],
-        "//mediapipe:android": [
-            "//mediapipe/util/android:asset_manager_util",
-            "//mediapipe/util/android/file/base",
-        ],
-        "//mediapipe/framework:android_no_jni": [],
-        "//mediapipe:ios": [],
-        "//mediapipe:macos": [
-            "@com_google_absl//absl/flags:flag",
-        ],
-    }),
+    ],
 )
 
 cc_library(
@@ -363,4 +345,10 @@ cc_test(
         ":rectangle_util",
         "//mediapipe/framework/port:gtest_main",
     ],
+)
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
 )

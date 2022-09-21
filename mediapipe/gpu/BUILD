@@ -161,6 +161,9 @@ cc_library(
         "//mediapipe:macos": [
             "gl_context_nsgl.cc",
         ],
+        "//mediapipe:emscripten": [
+            "gl_context_webgl.cc",
+        ],
     }),
     hdrs = ["gl_context.h"],
     copts = select({
@@ -1080,4 +1083,10 @@ ios_unit_test(
         "ios",
     ],
     deps = [":gl_ios_test_lib"],
+)
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
 )

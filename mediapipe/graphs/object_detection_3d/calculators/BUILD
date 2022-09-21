@@ -68,7 +68,7 @@ cc_library(
         "//mediapipe/gpu:gl_calculator_helper",
         "//mediapipe/gpu:shader_util",
         "//mediapipe/modules/objectron/calculators:camera_parameters_cc_proto",
-        "//mediapipe/util/android:asset_manager_util",
+        "//mediapipe/util:resource_util",
     ],
     alwayslink = 1,
 )
@@ -110,4 +110,10 @@ cc_library(
         "@com_google_absl//absl/strings",
     ],
     alwayslink = 1,
+)
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
 )

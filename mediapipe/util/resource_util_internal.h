@@ -14,6 +14,8 @@ absl::Status DefaultGetResourceContents(const std::string& path,
                                         std::string* output,
                                         bool read_as_binary);
 
+absl::StatusOr<std::string> DefaultPathToResourceAsFile(const std::string& path);
+
 }  // namespace internal
 }  // namespace mediapipe
 #endif  // MEDIAPIPE_UTIL_RESOURCE_UTIL_INTERNAL_H_

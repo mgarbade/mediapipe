@@ -1684,5 +1684,5 @@ cc_test(
 filegroup(
     name = "protos_src",
     srcs = glob(["*.proto"]),
-    visibility = ["//mediapipe:__subpackages__"],
+    visibility = ["//visibility:public"],
 )

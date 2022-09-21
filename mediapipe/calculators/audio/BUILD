@@ -355,3 +355,9 @@ cc_test(
         "@eigen_archive//:eigen3",
     ],
 )
+
+filegroup(
+    name = "protos_src",
+    srcs = glob(["*.proto"]),
+    visibility = ["//visibility:public"],
+)

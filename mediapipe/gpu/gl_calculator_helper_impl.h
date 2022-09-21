@@ -49,6 +49,7 @@ class GlCalculatorHelperImpl {
   // Creates a framebuffer and returns the texture that it is bound to.
   GlTexture CreateDestinationTexture(int output_width, int output_height,
                                      GpuBufferFormat format);
+  GlTexture CreateDestinationTexture(GpuBuffer& gpu_buffer);
 
   GpuBuffer GpuBufferWithImageFrame(std::shared_ptr<ImageFrame> image_frame);
   GpuBuffer GpuBufferCopyingImageFrame(const ImageFrame& image_frame);

@@ -169,12 +169,17 @@ std::unique_ptr<GpuBuffer> GlTexture::GetFrame<GpuBuffer>() const {
 
 GlTexture GlCalculatorHelperImpl::CreateDestinationTexture(
     int width, int height, GpuBufferFormat format) {
+  GpuBuffer buffer =
+      gpu_resources_.gpu_buffer_pool().GetBuffer(width, height, format);
+
+  return CreateDestinationTexture(buffer);
+}
+
+GlTexture GlCalculatorHelperImpl::CreateDestinationTexture(GpuBuffer& gpu_buffer) {
   if (!framebuffer_) {
     CreateFramebuffer();
   }
 
-  GpuBuffer gpu_buffer =
-      gpu_resources_.gpu_buffer_pool().GetBuffer(width, height, format);
   return MapGpuBuffer(gpu_buffer, gpu_buffer.GetWriteView<GlTextureView>(0));
 }
 
